@@ -7,19 +7,52 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const safeUnlink = (localFilePath) => {
+  try {
+    if (localFilePath && fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+  } catch {}
+};
+
+const resolveResourceType = (mimeType) => {
+  if (!mimeType) return "auto";
+  if (mimeType.startsWith("application/")) return "raw"; // PDFs and other docs
+  if (mimeType.startsWith("video/")) return "video";
+  if (mimeType.startsWith("image/")) return "image";
+  return "auto";
+};
+
+const uploadOnCloudinary = async (localFilePath, mimeType) => {
   try {
     if (!localFilePath) return null;
-    //
+
+    const resourceType = resolveResourceType(mimeType);
     const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto",
+      resource_type: resourceType,
     });
-    //file uploaded
-    console.log("file is uploaded on cloudinary", response.url);
-    fs.unlinkSync(localFilePath);
-    return response;
+
+    const success = Boolean(
+      response && (response.secure_url || response.url) && response.asset_id
+    );
+    if (success) {
+      console.log(
+        `cloudinary upload success: resource_type=${resourceType}, asset_id=${
+          response.asset_id
+        }, url=${response.secure_url || response.url}`
+      );
+      safeUnlink(localFilePath);
+      return response;
+    }
+
+    console.error(
+      "Cloudinary upload returned no asset_id or URL; treating as failure"
+    );
+    safeUnlink(localFilePath);
+    return null;
   } catch (error) {
-    fs.unlinkSync(localFilePath); //remove the locally saved file as upload optn got failed
+    console.error("Cloudinary upload error:", error?.message || error);
+    safeUnlink(localFilePath); // remove the locally saved file as upload failed
     return null;
   }
 };
