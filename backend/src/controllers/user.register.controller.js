@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import StudentModel from "../models/Student.model.js";
 import StartupModel from "../models/Startup.model.js";
+import bcrypt from "bcrypt";
 
 const generateAccessAndRefreshTokens = async (user) => {
   try {
@@ -214,4 +215,88 @@ const uploadResume = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerStudent, registerStartup, uploadResume };
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
+  }
+
+  // Check in both Student and Startup models
+  let user = await StudentModel.findOne({ email }).select("+password");
+
+  if (!user) {
+    user = await StartupModel.findOne({ email }).select("+password");
+  }
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  // Check password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid user credentials");
+  }
+
+  // Generate tokens
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user
+  );
+
+  // Remove sensitive fields
+  const userData = user.toObject();
+  delete userData.password;
+  delete userData.refreshToken;
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        user: userData,
+        accessToken,
+        refreshToken,
+      },
+      "User logged in successfully"
+    )
+  );
+});
+
+const logoutUser = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const userRole = req.user.role;
+
+  let UserModel;
+  if (userRole === "student") {
+    UserModel = StudentModel;
+  } else if (userRole === "startup") {
+    UserModel = StartupModel;
+  } else {
+    throw new ApiError(400, "Invalid user role");
+  }
+
+  await UserModel.findByIdAndUpdate(
+    userId,
+    {
+      $unset: {
+        refreshToken: 1,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+
+export {
+  registerStudent,
+  registerStartup,
+  uploadResume,
+  loginUser,
+  logoutUser,
+};

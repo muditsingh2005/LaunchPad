@@ -42,7 +42,7 @@ const studentSchema = new mongoose.Schema(
     },
 
     resumeUrl: {
-      type: String, // Link to uploaded resume (e.g., Cloudinary / Drive)
+      type: String,
     },
 
     appliedProjects: [
