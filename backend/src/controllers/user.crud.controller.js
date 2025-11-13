@@ -202,6 +202,50 @@ const deleteStudentAccount = asyncHandler(async (req, res) => {
   );
 });
 
+const uploadResume = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, "Resume file is required");
+  }
+
+  // Get student ID from authenticated user
+  const studentId = req.user._id;
+
+  // Verify the user exists and is a student
+  const student = await StudentModel.findById(studentId);
+  if (!student) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  if (student.role !== "student") {
+    throw new ApiError(403, "Only students can upload resumes");
+  }
+
+  // Upload resume to Cloudinary
+  const { uploadOnCloudinary } = await import("../utils/cloudinary.js");
+  const uploadResponse = await uploadOnCloudinary(
+    req.file.path,
+    req.file.mimetype
+  );
+
+  if (!uploadResponse) {
+    throw new ApiError(400, "Resume upload failed");
+  }
+
+  // Update student's resumeUrl
+  student.resumeUrl = uploadResponse.secure_url;
+  await student.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { resumeUrl: student.resumeUrl },
+        "Resume uploaded successfully"
+      )
+    );
+});
+
 //controllers for startup role
 const getStartupProfile = asyncHandler(async (req, res) => {
   const startupId = req.user?._id || req.params?.id;
@@ -231,4 +275,5 @@ export {
   uploadStudentProfilePicture,
   deleteStudentAccount,
   getStartupProfile,
+  uploadResume,
 };

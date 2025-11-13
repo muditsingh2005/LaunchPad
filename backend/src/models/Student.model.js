@@ -47,7 +47,8 @@ const studentSchema = new mongoose.Schema(
 
     profilePicture: {
       type: String,
-      default: "https://via.placeholder.com/150?text=No+Profile+Picture",
+      default:
+        "https://i.pinimg.com/736x/2c/47/d5/2c47d5dd5b532f83bb55c4cd6f5bd1ef.jpg",
     },
 
     appliedProjects: [

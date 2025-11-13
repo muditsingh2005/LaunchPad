@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   registerStudent,
   registerStartup,
-  uploadResume,
   loginUser,
   logoutUser,
 } from "../controllers/user.register.controller.js";
@@ -20,9 +19,5 @@ router
 router.route("/login").post(loginUser);
 
 router.route("/logout").post(verifyJWT, logoutUser);
-
-router
-  .route("/upload-resume")
-  .post(verifyJWT, upload.single("resume"), uploadResume);
 
 export default router;
