@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import StudentModel from "../models/Student.model.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const getStudentProfile = asyncHandler(async (req, res) => {
   const studentId = req.user?._id || req.params?.id;
@@ -107,4 +108,66 @@ const updateStudentProfile = asyncHandler(async (req, res) => {
     );
 });
 
-export { getStudentProfile, updateStudentProfile };
+const uploadStudentProfilePicture = asyncHandler(async (req, res) => {
+  const studentId = req.user?._id;
+
+  if (!studentId) {
+    throw new ApiError(401, "Unauthorized - Student ID not found");
+  }
+
+  if (!req.file) {
+    throw new ApiError(400, "Profile picture file is required");
+  }
+
+  const allowedImageMimes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
+
+  if (!allowedImageMimes.includes(req.file.mimetype)) {
+    throw new ApiError(
+      400,
+      "Invalid file type. Only image files (JPEG, PNG, GIF, WebP) are allowed."
+    );
+  }
+
+  const uploadResponse = await uploadOnCloudinary(
+    req.file.path,
+    req.file.mimetype
+  );
+
+  if (!uploadResponse) {
+    throw new ApiError(400, "Failed to upload profile picture to Cloudinary");
+  }
+
+  const profilePictureUrl = uploadResponse.secure_url || uploadResponse.url;
+
+  if (!profilePictureUrl) {
+    throw new ApiError(400, "No URL returned from Cloudinary upload");
+  }
+
+  const updatedStudent = await StudentModel.findByIdAndUpdate(
+    studentId,
+    { $set: { profilePicture: profilePictureUrl } },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken");
+
+  if (!updatedStudent) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        profilePictureUrl: updatedStudent.profilePicture,
+      },
+      "Profile picture uploaded successfully"
+    )
+  );
+});
+
+export { getStudentProfile, updateStudentProfile, uploadStudentProfilePicture };

@@ -45,6 +45,11 @@ const studentSchema = new mongoose.Schema(
       type: String,
     },
 
+    profilePicture: {
+      type: String,
+      default: "https://via.placeholder.com/150?text=No+Profile+Picture",
+    },
+
     appliedProjects: [
       {
         type: mongoose.Schema.Types.ObjectId,
