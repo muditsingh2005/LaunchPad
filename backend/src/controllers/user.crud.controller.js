@@ -2,8 +2,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import StudentModel from "../models/Student.model.js";
+import StartupModel from "../models/Startup.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
+//controllers for student role
 const getStudentProfile = asyncHandler(async (req, res) => {
   const studentId = req.user?._id || req.params?.id;
 
@@ -200,9 +202,33 @@ const deleteStudentAccount = asyncHandler(async (req, res) => {
   );
 });
 
+//controllers for startup role
+const getStartupProfile = asyncHandler(async (req, res) => {
+  const startupId = req.user?._id || req.params?.id;
+
+  if (!startupId) {
+    throw new ApiError(400, "Startup ID is required");
+  }
+
+  const startup = await StartupModel.findById(startupId).select(
+    "-password -refreshToken"
+  );
+
+  if (!startup) {
+    throw new ApiError(404, "Startup not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, startup, "Startup profile fetched successfully")
+    );
+});
+
 export {
   getStudentProfile,
   updateStudentProfile,
   uploadStudentProfilePicture,
   deleteStudentAccount,
+  getStartupProfile,
 };

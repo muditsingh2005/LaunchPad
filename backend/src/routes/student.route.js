@@ -11,6 +11,7 @@ import { Router } from "express";
 const router = Router();
 
 router.route("/profile").get(verifyJWT, getStudentProfile);
+router.route("/profile/:id").get(verifyJWT, getStudentProfile); //didnt tested
 
 router.route("/profile/update").put(verifyJWT, updateStudentProfile);
 
@@ -23,7 +24,5 @@ router
   );
 
 router.route("/profile/delete").delete(verifyJWT, deleteStudentAccount);
-
-router.route("/profile/:id").get(verifyJWT, getStudentProfile); //didnt tested
 
 export default router;
