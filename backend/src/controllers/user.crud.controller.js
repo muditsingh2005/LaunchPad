@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import StudentModel from "../models/Student.model.js";
 import StartupModel from "../models/Startup.model.js";
+import ProjectModel from "../models/Project.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 //controllers for student role
@@ -29,14 +30,12 @@ const getStudentProfile = asyncHandler(async (req, res) => {
 });
 
 const updateStudentProfile = asyncHandler(async (req, res) => {
-  // Get student ID from authenticated user
   const studentId = req.user?._id;
 
   if (!studentId) {
     throw new ApiError(401, "Unauthorized - Student ID not found");
   }
 
-  // Allowed fields to update
   const allowedFields = [
     "name",
     "skills",
@@ -173,21 +172,18 @@ const uploadStudentProfilePicture = asyncHandler(async (req, res) => {
 });
 
 const deleteStudentAccount = asyncHandler(async (req, res) => {
-  // Get student ID from authenticated user
   const studentId = req.user?._id;
 
   if (!studentId) {
     throw new ApiError(401, "Unauthorized - Student ID not found");
   }
 
-  // Find student before deletion to ensure they exist
   const student = await StudentModel.findById(studentId);
 
   if (!student) {
     throw new ApiError(404, "Student not found");
   }
 
-  // Delete student from database
   await StudentModel.findByIdAndDelete(studentId);
 
   return res.status(200).json(
@@ -206,11 +202,8 @@ const uploadResume = asyncHandler(async (req, res) => {
   if (!req.file) {
     throw new ApiError(400, "Resume file is required");
   }
-
-  // Get student ID from authenticated user
   const studentId = req.user._id;
 
-  // Verify the user exists and is a student
   const student = await StudentModel.findById(studentId);
   if (!student) {
     throw new ApiError(404, "Student not found");
@@ -220,7 +213,6 @@ const uploadResume = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Only students can upload resumes");
   }
 
-  // Upload resume to Cloudinary
   const { uploadOnCloudinary } = await import("../utils/cloudinary.js");
   const uploadResponse = await uploadOnCloudinary(
     req.file.path,
@@ -230,8 +222,6 @@ const uploadResume = asyncHandler(async (req, res) => {
   if (!uploadResponse) {
     throw new ApiError(400, "Resume upload failed");
   }
-
-  // Update student's resumeUrl
   student.resumeUrl = uploadResponse.secure_url;
   await student.save();
 
@@ -350,6 +340,39 @@ const updateStartupProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const deleteStartupAccount = asyncHandler(async (req, res) => {
+  const startupId = req.user?._id;
+
+  if (!startupId) {
+    throw new ApiError(401, "Unauthorized - Startup ID not found");
+  }
+
+  const startup = await StartupModel.findById(startupId);
+
+  if (!startup) {
+    throw new ApiError(404, "Startup not found");
+  }
+
+  const deletedProjectsResult = await ProjectModel.deleteMany({
+    startup: startupId,
+  });
+
+  await StartupModel.findByIdAndDelete(startupId);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        deletedEmail: startup.email,
+        deletedCompanyName: startup.name,
+        deletedProjectsCount: deletedProjectsResult.deletedCount,
+        deletedAt: new Date().toISOString(),
+      },
+      "Startup account and associated projects deleted successfully"
+    )
+  );
+});
+
 export {
   getStudentProfile,
   updateStudentProfile,
@@ -357,5 +380,6 @@ export {
   deleteStudentAccount,
   getStartupProfile,
   updateStartupProfile,
+  deleteStartupAccount,
   uploadResume,
 };
