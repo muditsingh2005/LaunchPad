@@ -283,4 +283,34 @@ const deleteProject = asyncHandler(async (req, res) => {
   );
 });
 
-export { createProject, updateProject, deleteProject };
+const getStartupProjects = asyncHandler(async (req, res) => {
+  const startupId = req.user?._id;
+
+  if (!startupId) {
+    throw new ApiError(401, "Unauthorized - Startup ID not found");
+  }
+
+  const startup = await StartupModel.findById(startupId);
+
+  if (!startup) {
+    throw new ApiError(404, "Startup not found");
+  }
+
+  const projects = await ProjectModel.find({ startup: startupId }).populate(
+    "startup",
+    "-password -refreshToken"
+  );
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        count: projects.length,
+        projects: projects,
+      },
+      "Startup projects fetched successfully"
+    )
+  );
+});
+
+export { createProject, updateProject, deleteProject, getStartupProjects };
