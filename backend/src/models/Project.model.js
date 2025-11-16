@@ -26,6 +26,14 @@ const projectSchema = new mongoose.Schema(
         ref: "Student",
       },
     ],
+
+    applicants: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Student",
+        default: [],
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -331,10 +331,60 @@ const getAllProjects = asyncHandler(async (req, res) => {
   );
 });
 
+const applyToProject = asyncHandler(async (req, res) => {
+  const studentId = req.user?._id;
+
+  if (!studentId) {
+    throw new ApiError(401, "Unauthorized - Student ID not found");
+  }
+
+  const { projectId } = req.params;
+
+  if (!projectId) {
+    throw new ApiError(400, "Project ID is required");
+  }
+
+  const project = await ProjectModel.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found");
+  }
+
+  // Initialize applicants array if it doesn't exist
+  if (!project.applicants) {
+    project.applicants = [];
+  }
+
+  const alreadyApplied = project.applicants.some(
+    (id) => id.toString() === studentId.toString()
+  );
+
+  if (alreadyApplied) {
+    throw new ApiError(400, "You have already applied to this project");
+  }
+
+  // Add student to applicants array
+  project.applicants.push(studentId);
+  await project.save();
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        projectId: project._id,
+        applicants: project.applicants,
+        applicantCount: project.applicants.length,
+      },
+      "Successfully applied to project"
+    )
+  );
+});
+
 export {
   createProject,
   updateProject,
   deleteProject,
   getStartupProjects,
   getAllProjects,
+  applyToProject,
 };

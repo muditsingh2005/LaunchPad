@@ -4,6 +4,7 @@ import {
   deleteProject,
   getStartupProjects,
   getAllProjects,
+  applyToProject,
 } from "../controllers/project.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { Router } from "express";
@@ -15,6 +16,8 @@ router.route("/all-projects").get(getAllProjects);
 router.route("/create").post(verifyJWT, createProject);
 
 router.route("/my-projects").get(verifyJWT, getStartupProjects);
+
+router.route("/apply/:projectId").post(verifyJWT, applyToProject);
 
 router.route("/update/:id").put(verifyJWT, updateProject);
 
