@@ -313,4 +313,28 @@ const getStartupProjects = asyncHandler(async (req, res) => {
   );
 });
 
-export { createProject, updateProject, deleteProject, getStartupProjects };
+const getAllProjects = asyncHandler(async (req, res) => {
+  // Fetch all projects from the database
+  const projects = await ProjectModel.find()
+    .populate("startup", "name domain email founderName logoUrl")
+    .sort({ createdAt: -1 });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        count: projects.length,
+        projects: projects,
+      },
+      "All projects fetched successfully"
+    )
+  );
+});
+
+export {
+  createProject,
+  updateProject,
+  deleteProject,
+  getStartupProjects,
+  getAllProjects,
+};

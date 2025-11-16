@@ -3,11 +3,14 @@ import {
   updateProject,
   deleteProject,
   getStartupProjects,
+  getAllProjects,
 } from "../controllers/project.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { Router } from "express";
 
 const router = Router();
+
+router.route("/all-projects").get(getAllProjects);
 
 router.route("/create").post(verifyJWT, createProject);
 
