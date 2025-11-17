@@ -7,6 +7,7 @@ import {
   applyToProject,
   getStudentAppliedProjects,
   getProjectApplicants,
+  updateApplicationStatus,
 } from "../controllers/project.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { Router } from "express";
@@ -24,6 +25,10 @@ router.route("/apply/:projectId").post(verifyJWT, applyToProject);
 router.route("/applied-projects").get(verifyJWT, getStudentAppliedProjects);
 
 router.route("/applicants/:projectId").get(verifyJWT, getProjectApplicants);
+
+router
+  .route("/applicants/:projectId/:studentId")
+  .put(verifyJWT, updateApplicationStatus);
 
 router.route("/update/:id").put(verifyJWT, updateProject);
 

@@ -29,9 +29,19 @@ const projectSchema = new mongoose.Schema(
 
     applicants: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Student",
-        default: [],
+        student: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Student",
+        },
+        status: {
+          type: String,
+          enum: ["pending", "accepted", "rejected"],
+          default: "pending",
+        },
+        appliedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
   },

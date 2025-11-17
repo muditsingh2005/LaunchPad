@@ -355,25 +355,37 @@ const applyToProject = asyncHandler(async (req, res) => {
     project.applicants = [];
   }
 
-  const alreadyApplied = project.applicants.some(
-    (id) => id.toString() === studentId.toString()
-  );
+  // Check if student has already applied
+  const alreadyApplied = project.applicants.some((applicant) => {
+    // Handle both new format (applicant.student) and old format (applicant is just ID)
+    const applicantId = applicant.student || applicant;
+    return applicantId.toString() === studentId.toString();
+  });
 
   if (alreadyApplied) {
     throw new ApiError(400, "You have already applied to this project");
   }
 
-  // Add student to applicants array
-  project.applicants.push(studentId);
+  // Add student to applicants array with pending status
+  project.applicants.push({
+    student: studentId,
+    status: "pending",
+  });
   await project.save();
+
+  // Populate and return updated applicants
+  const updatedProject = await ProjectModel.findById(projectId).populate(
+    "applicants.student",
+    "firstName lastName email"
+  );
 
   return res.status(200).json(
     new ApiResponse(
       200,
       {
-        projectId: project._id,
-        applicants: project.applicants,
-        applicantCount: project.applicants.length,
+        projectId: updatedProject._id,
+        applicants: updatedProject.applicants,
+        applicantCount: updatedProject.applicants.length,
       },
       "Successfully applied to project"
     )
@@ -389,11 +401,11 @@ const getStudentAppliedProjects = asyncHandler(async (req, res) => {
 
   // Fetch all projects where student ID exists in applicants array
   const projects = await ProjectModel.find({
-    applicants: { $in: [studentId] },
+    "applicants.student": studentId,
   })
     .populate("startup", "name domain email founderName logoUrl")
     .populate("selectedStudents", "firstName lastName email")
-    .populate("applicants", "firstName lastName email")
+    .populate("applicants.student", "firstName lastName email")
     .sort({ createdAt: -1 });
 
   return res.status(200).json(
@@ -437,7 +449,7 @@ const getProjectApplicants = asyncHandler(async (req, res) => {
 
   // Populate applicants with student details
   const populatedProject = await ProjectModel.findById(projectId).populate(
-    "applicants",
+    "applicants.student",
     "firstName lastName email skills year semester batch mobileNumber"
   );
 
@@ -455,6 +467,114 @@ const getProjectApplicants = asyncHandler(async (req, res) => {
   );
 });
 
+const updateApplicationStatus = asyncHandler(async (req, res) => {
+  const startupId = req.user?._id;
+
+  if (!startupId) {
+    throw new ApiError(401, "Unauthorized - Startup ID not found");
+  }
+
+  const { projectId, studentId } = req.params;
+
+  if (!projectId) {
+    throw new ApiError(400, "Project ID is required");
+  }
+
+  if (!studentId) {
+    throw new ApiError(400, "Student ID is required");
+  }
+
+  const { status } = req.body;
+
+  if (!status) {
+    throw new ApiError(400, "Status is required");
+  }
+
+  const validStatuses = ["pending", "accepted", "rejected"];
+  if (!validStatuses.includes(status)) {
+    throw new ApiError(
+      400,
+      "Invalid status. Must be one of: pending, accepted, rejected"
+    );
+  }
+
+  const project = await ProjectModel.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found");
+  }
+
+  if (project.startup.toString() !== startupId.toString()) {
+    throw new ApiError(403, "Unauthorized - You do not own this project");
+  }
+
+  let applicantIndex = -1;
+  let foundApplicant = null;
+
+  // Check if applicants have proper structure, skip corrupted data
+  for (let i = 0; i < project.applicants.length; i++) {
+    const applicant = project.applicants[i];
+
+    // Skip corrupted data (has buffer field, no student, no proper status)
+    if (applicant.buffer || typeof applicant !== "object") {
+      continue;
+    }
+
+    const applicantId = applicant.student ? applicant.student : applicant;
+
+    try {
+      if (
+        applicantId &&
+        applicantId.toString &&
+        applicantId.toString() === studentId.toString()
+      ) {
+        applicantIndex = i;
+        foundApplicant = applicant;
+        break;
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+
+  if (applicantIndex === -1) {
+    throw new ApiError(
+      404,
+      "Applicant not found for this project. Please ensure the student has applied to this project."
+    );
+  }
+
+  if (project.applicants[applicantIndex].student) {
+    project.applicants[applicantIndex].status = status;
+  } else {
+    // Convert old format to new format
+    project.applicants[applicantIndex] = {
+      student: project.applicants[applicantIndex],
+      status: status,
+      appliedAt: new Date(),
+    };
+  }
+  await project.save();
+
+  // Populate and return the updated project
+  const updatedProject = await ProjectModel.findById(projectId).populate(
+    "applicants.student",
+    "firstName lastName email skills year semester batch"
+  );
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        projectId: updatedProject._id,
+        projectTitle: updatedProject.title,
+        applicants: updatedProject.applicants,
+      },
+      `Application status updated to ${status}`
+    )
+  );
+});
+
 export {
   createProject,
   updateProject,
@@ -464,4 +584,5 @@ export {
   applyToProject,
   getStudentAppliedProjects,
   getProjectApplicants,
+  updateApplicationStatus,
 };
