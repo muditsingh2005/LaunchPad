@@ -380,6 +380,81 @@ const applyToProject = asyncHandler(async (req, res) => {
   );
 });
 
+const getStudentAppliedProjects = asyncHandler(async (req, res) => {
+  const studentId = req.user?._id;
+
+  if (!studentId) {
+    throw new ApiError(401, "Unauthorized - Student ID not found");
+  }
+
+  // Fetch all projects where student ID exists in applicants array
+  const projects = await ProjectModel.find({
+    applicants: { $in: [studentId] },
+  })
+    .populate("startup", "name domain email founderName logoUrl")
+    .populate("selectedStudents", "firstName lastName email")
+    .populate("applicants", "firstName lastName email")
+    .sort({ createdAt: -1 });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        count: projects.length,
+        projects: projects,
+      },
+      "Student applied projects fetched successfully"
+    )
+  );
+});
+
+const getProjectApplicants = asyncHandler(async (req, res) => {
+  // Get startup ID from authenticated user
+  const startupId = req.user?._id;
+
+  if (!startupId) {
+    throw new ApiError(401, "Unauthorized - Startup ID not found");
+  }
+
+  // Get project ID from params
+  const { projectId } = req.params;
+
+  if (!projectId) {
+    throw new ApiError(400, "Project ID is required");
+  }
+
+  // Find the project
+  const project = await ProjectModel.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found");
+  }
+
+  // Verify that the authenticated startup owns this project
+  if (project.startup.toString() !== startupId.toString()) {
+    throw new ApiError(403, "Unauthorized - You do not own this project");
+  }
+
+  // Populate applicants with student details
+  const populatedProject = await ProjectModel.findById(projectId).populate(
+    "applicants",
+    "firstName lastName email skills year semester batch mobileNumber"
+  );
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        projectId: project._id,
+        projectTitle: project.title,
+        applicantCount: populatedProject.applicants.length,
+        applicants: populatedProject.applicants,
+      },
+      "Project applicants fetched successfully"
+    )
+  );
+});
+
 export {
   createProject,
   updateProject,
@@ -387,4 +462,6 @@ export {
   getStartupProjects,
   getAllProjects,
   applyToProject,
+  getStudentAppliedProjects,
+  getProjectApplicants,
 };
