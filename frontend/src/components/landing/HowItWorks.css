@@ -1,0 +1,289 @@
+.how-it-works {
+  padding: 140px 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.how-it-works::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(
+    circle,
+    rgba(102, 126, 234, 0.08) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.how-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.steps-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-top: 80px;
+  margin-bottom: 80px;
+  position: relative;
+}
+
+.step-card {
+  flex: 1;
+  max-width: 360px;
+  background: white;
+  border-radius: 28px;
+  padding: 48px 32px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInScale 0.8s ease-out backwards;
+}
+
+.step-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.step-number {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.15;
+}
+
+.step-icon-wrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 28px;
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.25);
+  transition: all 0.4s ease;
+}
+
+.step-card:hover .step-icon-wrapper {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.35);
+}
+
+.step-icon {
+  font-size: 48px;
+  filter: grayscale(100%) brightness(200%);
+}
+
+.step-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.01em;
+}
+
+.step-description {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #4a5568;
+  margin: 0;
+}
+
+.step-connector {
+  width: 200px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 -40px;
+  z-index: -1;
+}
+
+.connector-arrow {
+  position: absolute;
+  font-size: 32px;
+  font-weight: bold;
+  opacity: 0.6;
+  animation: arrowSlide 2s ease-in-out infinite;
+}
+
+@keyframes arrowSlide {
+  0%,
+  100% {
+    transform: translateX(-10px);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateX(10px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cta-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 60px;
+}
+
+.cta-button {
+  padding: 20px 48px;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cta-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4);
+}
+
+.cta-button svg {
+  transition: transform 0.3s ease;
+}
+
+.cta-button:hover svg {
+  transform: translateX(6px);
+}
+
+@media (max-width: 1200px) {
+  .steps-container {
+    gap: 40px;
+  }
+
+  .step-connector {
+    width: 100px;
+    margin: 0 -20px;
+  }
+
+  .step-card {
+    max-width: 300px;
+    padding: 40px 28px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .how-it-works {
+    padding: 100px 0;
+  }
+
+  .steps-container {
+    flex-direction: column;
+    gap: 60px;
+    margin-top: 60px;
+    margin-bottom: 60px;
+  }
+
+  .step-card {
+    max-width: 500px;
+    width: 100%;
+  }
+
+  .step-connector {
+    width: 80px;
+    height: 100px;
+    margin: -30px 0;
+    transform: rotate(90deg);
+  }
+
+  .connector-arrow {
+    transform: rotate(-90deg);
+  }
+
+  @keyframes arrowSlide {
+    0%,
+    100% {
+      transform: rotate(-90deg) translateX(-10px);
+      opacity: 0.4;
+    }
+    50% {
+      transform: rotate(-90deg) translateX(10px);
+      opacity: 0.8;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .how-it-works {
+    padding: 80px 0;
+  }
+
+  .how-container {
+    padding: 0 24px;
+  }
+
+  .section-title {
+    font-size: 36px;
+  }
+
+  .section-subtitle {
+    font-size: 18px;
+  }
+
+  .step-card {
+    padding: 36px 24px;
+  }
+
+  .step-title {
+    font-size: 22px;
+  }
+
+  .step-description {
+    font-size: 15px;
+  }
+
+  .step-icon-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .step-icon {
+    font-size: 40px;
+  }
+
+  .cta-button {
+    width: 100%;
+    justify-content: center;
+    padding: 18px 36px;
+  }
+}
