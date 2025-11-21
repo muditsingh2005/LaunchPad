@@ -1,0 +1,109 @@
+/* ==================== Dashboard Layout ==================== */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+}
+
+.dashboard-content-wrapper {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Loading State */
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: white;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dashboard-loading p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Error State */
+.dashboard-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
+  color: white;
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-error h3 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-error p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.retry-btn {
+  padding: 0.75rem 2rem;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* ==================== Responsive ==================== */
+@media (max-width: 1024px) {
+  .dashboard-main {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-content-wrapper {
+    padding: 1rem;
+  }
+}

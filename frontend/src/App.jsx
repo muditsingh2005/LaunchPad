@@ -16,9 +16,9 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import RoleSelection from "./pages/auth/RoleSelection";
 
-// Dashboard Pages
-import StudentDashboard from "./pages/dashboard/StudentDashboard";
-import StartupDashboard from "./pages/dashboard/StartupDashboard";
+// Dashboard Layout
+import DashboardLayout from "./components/layout/DashboardLayout";
+import DashboardRouter from "./pages/dashboard/DashboardRouter";
 
 import "./App.css";
 
@@ -34,24 +34,26 @@ function App() {
             <Route path="/register" element={<RoleSelection />} />
             <Route path="/register/:role" element={<Register />} />
 
-            {/* Protected Student Routes */}
+            {/* Protected Dashboard with Layout */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardRouter />} />
+            </Route>
+
+            {/* Legacy Routes - Redirect to /dashboard */}
             <Route
               path="/student/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["student"]}>
-                  <StudentDashboard />
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/dashboard" replace />}
             />
-
-            {/* Protected Startup Routes */}
             <Route
               path="/startup/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["startup"]}>
-                  <StartupDashboard />
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/dashboard" replace />}
             />
 
             {/* Catch all - redirect to landing */}

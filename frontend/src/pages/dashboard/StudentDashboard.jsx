@@ -1,40 +1,48 @@
 import React from "react";
-import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import Button from "../../components/common/Button";
+import { useOutletContext } from "react-router-dom";
+import { motion } from "framer-motion";
 import "./Dashboard.css";
 
 const StudentDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/login");
-  };
+  const { userProfile } = useOutletContext();
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>Student Dashboard</h1>
-        <Button onClick={handleLogout} variant="secondary" size="small">
-          Logout
-        </Button>
-      </div>
-
-      <div className="dashboard-content">
+      <motion.div
+        className="dashboard-content"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="welcome-card">
-          <h2>Welcome, {user?.name}! 🎓</h2>
-          <p>Email: {user?.email}</p>
-          <p>Department: {user?.department}</p>
-          <p>Year: {user?.year}</p>
-          {user?.skills && user.skills.length > 0 && (
+          <h2>Welcome back, {userProfile?.name}! 🎓</h2>
+          <div className="user-details">
+            <p>
+              <strong>Email:</strong> {userProfile?.email}
+            </p>
+            <p>
+              <strong>Roll No:</strong> {userProfile?.rollNo}
+            </p>
+            <p>
+              <strong>Department:</strong> {userProfile?.department}
+            </p>
+            <p>
+              <strong>Year:</strong> {userProfile?.year}
+            </p>
+            {userProfile?.bio && (
+              <p>
+                <strong>Bio:</strong> {userProfile.bio}
+              </p>
+            )}
+          </div>
+
+          {userProfile?.skills && userProfile.skills.length > 0 && (
             <div className="skills-section">
               <p>
-                <strong>Skills:</strong>
+                <strong>Your Skills:</strong>
               </p>
               <div className="skills-tags">
-                {user.skills.map((skill, index) => (
+                {userProfile.skills.map((skill, index) => (
                   <span key={index} className="skill-tag">
                     {skill}
                   </span>
@@ -50,7 +58,25 @@ const StudentDashboard = () => {
             Browse available projects, apply, and start building your portfolio.
           </p>
         </div>
-      </div>
+
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon">📝</div>
+            <h4>Applications</h4>
+            <p className="stat-number">0</p>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">✅</div>
+            <h4>Accepted</h4>
+            <p className="stat-number">0</p>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">🏆</div>
+            <h4>Completed</h4>
+            <p className="stat-number">0</p>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };
