@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Header.css";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,10 +15,18 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  const handleSignup = () => {
+    navigate("/register");
+  };
+
   return (
     <header className={`header ${scrolled ? "scrolled" : ""}`}>
       <div className="header-container">
-        <div className="logo">
+        <div className="logo" onClick={() => navigate("/")}>
           <span className="logo-icon">🚀</span>
           <span className="logo-text">Campus Freelance Hub</span>
         </div>
@@ -40,8 +50,12 @@ const Header = () => {
         </nav>
 
         <div className="auth-buttons">
-          <button className="btn-login">Login</button>
-          <button className="btn-signup">Sign Up</button>
+          <button className="btn-login" onClick={handleLogin}>
+            Login
+          </button>
+          <button className="btn-signup" onClick={handleSignup}>
+            Sign Up
+          </button>
         </div>
       </div>
     </header>
