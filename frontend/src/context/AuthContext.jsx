@@ -1,12 +1,19 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import authService from "../services/authService";
+import useUserStore from "../store/useUserStore";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const {
+    user: storeUser,
+    setUser: setStoreUser,
+    clearUser,
+    setLoading: setStoreLoading,
+  } = useUserStore();
+  const [user, setUser] = useState(storeUser);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!storeUser);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -16,14 +23,24 @@ export const AuthProvider = ({ children }) => {
 
       if (token && userData) {
         setUser(userData);
+        setStoreUser(userData);
         setIsAuthenticated(true);
       }
 
       setLoading(false);
+      setStoreLoading(false);
     };
 
     initAuth();
-  }, []);
+  }, [setStoreUser, setStoreLoading]);
+
+  // Sync local state with store
+  useEffect(() => {
+    if (storeUser) {
+      setUser(storeUser);
+      setIsAuthenticated(true);
+    }
+  }, [storeUser]);
 
   // Login function
   const login = async (email, password) => {
@@ -31,6 +48,7 @@ export const AuthProvider = ({ children }) => {
 
     if (result.success) {
       setUser(result.user);
+      setStoreUser(result.user);
       setIsAuthenticated(true);
     }
 
@@ -43,6 +61,7 @@ export const AuthProvider = ({ children }) => {
 
     if (result.success) {
       setUser(result.user);
+      setStoreUser(result.user);
       setIsAuthenticated(true);
     }
 
@@ -55,6 +74,7 @@ export const AuthProvider = ({ children }) => {
 
     if (result.success) {
       setUser(result.user);
+      setStoreUser(result.user);
       setIsAuthenticated(true);
     }
 
@@ -65,12 +85,14 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     await authService.logout();
     setUser(null);
+    clearUser();
     setIsAuthenticated(false);
   };
 
   // Update user data
   const updateUser = (userData) => {
     setUser(userData);
+    setStoreUser(userData);
     authService.setUser(userData);
   };
 
