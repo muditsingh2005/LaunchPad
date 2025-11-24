@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { studentDashboardAPI } from "../../services/dashboardService";
 import { DashboardSkeleton } from "../../components/common/SkeletonLoader";
@@ -7,6 +7,7 @@ import "./StudentDashboard.css";
 
 const StudentDashboard = () => {
   const { userProfile } = useOutletContext();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [stats, setLocalStats] = useState({
@@ -254,7 +255,12 @@ const StudentDashboard = () => {
                 </div>
 
                 <div className="application-actions">
-                  <button className="view-button">View Details</button>
+                  <button
+                    className="view-button"
+                    onClick={() => navigate(`/projects/${application._id}`)}
+                  >
+                    View Details
+                  </button>
                 </div>
               </motion.div>
             ))}
