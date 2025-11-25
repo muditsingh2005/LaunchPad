@@ -7,11 +7,13 @@ import ProjectFilters from "../../components/projects/ProjectFilters";
 import SearchBar from "../../components/projects/SearchBar";
 import Pagination from "../../components/projects/Pagination";
 import { CardSkeleton } from "../../components/common/SkeletonLoader";
+import useUserStore from "../../store/useUserStore";
 import "./ProjectListingPage.css";
 
 const ProjectListingPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useUserStore();
 
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -191,6 +193,10 @@ const ProjectListingPage = () => {
     navigate(`/projects/${projectId}`);
   };
 
+  const handleDashboardClick = () => {
+    navigate("/dashboard");
+  };
+
   const handleClearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("all");
@@ -257,10 +263,22 @@ const ProjectListingPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1>
-          <span className="icon">🚀</span>{" "}
-          <span className="gradient-text">Explore Projects</span>
-        </h1>
+        <div className="header-top">
+          <h1>
+            <span className="icon">🚀</span>{" "}
+            <span className="gradient-text">Explore Projects</span>
+          </h1>
+          {user && (
+            <button
+              className="dashboard-nav-btn"
+              onClick={handleDashboardClick}
+              title="Go to Dashboard"
+            >
+              <span className="dashboard-icon">📊</span>
+              <span className="dashboard-text">Dashboard</span>
+            </button>
+          )}
+        </div>
         <p>
           Discover {filteredProjects.length} amazing opportunities from top
           startups

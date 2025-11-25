@@ -10,10 +10,19 @@
   animation: fadeInDown 0.5s ease-out;
 }
 
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
 .listing-header h1 {
   font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,6 +38,43 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Dashboard Navigation Button */
+.dashboard-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  position: absolute;
+  right: 0;
+}
+
+.dashboard-nav-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.dashboard-nav-btn:active {
+  transform: translateY(0);
+}
+
+.dashboard-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.dashboard-text {
+  font-weight: 700;
 }
 
 .listing-header p {
@@ -228,6 +274,16 @@
     padding: 1rem;
   }
 
+  .header-top {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .dashboard-nav-btn {
+    position: static;
+    width: auto;
+  }
+
   .listing-header h1 {
     font-size: 2rem;
   }
@@ -259,6 +315,15 @@
 
   .listing-header h1 .icon {
     font-size: 1.5rem;
+  }
+
+  .dashboard-nav-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .dashboard-icon {
+    font-size: 1.1rem;
   }
 
   .empty-state,
