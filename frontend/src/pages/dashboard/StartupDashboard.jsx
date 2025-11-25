@@ -3,6 +3,7 @@ import { useOutletContext, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { startupDashboardAPI } from "../../services/dashboardService";
 import { DashboardSkeleton } from "../../components/common/SkeletonLoader";
+import EditProjectModal from "../projects/EditProjectModal";
 import "./StartupDashboard.css";
 
 const StartupDashboard = () => {
@@ -24,6 +25,10 @@ const StartupDashboard = () => {
     project: null,
   });
   const [deletingId, setDeletingId] = useState(null);
+  const [editModal, setEditModal] = useState({
+    show: false,
+    projectId: null,
+  });
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   const fetchDashboardData = useCallback(async () => {
@@ -140,6 +145,39 @@ const StartupDashboard = () => {
     setDeleteModal({ show: false, project: null });
   };
 
+  const handleEditClick = (project) => {
+    setEditModal({ show: true, projectId: project._id });
+  };
+
+  const handleEditClose = () => {
+    setEditModal({ show: false, projectId: null });
+  };
+
+  const handleEditSuccess = (updatedProject) => {
+    // Update the project in local state
+    setMyProjects((prev) =>
+      prev.map((p) => (p._id === updatedProject._id ? updatedProject : p))
+    );
+
+    // Update stats if status changed
+    setLocalStats((prev) => {
+      const oldProject = myProjects.find((p) => p._id === updatedProject._id);
+      if (oldProject?.status !== updatedProject.status) {
+        return {
+          ...prev,
+          activeProjects:
+            updatedProject.status === "open"
+              ? prev.activeProjects + 1
+              : prev.activeProjects - 1,
+        };
+      }
+      return prev;
+    });
+
+    showToast("Project updated successfully", "success");
+    handleEditClose();
+  };
+
   if (loading) {
     return (
       <div className="startup-dashboard">
@@ -224,6 +262,15 @@ const StartupDashboard = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Edit Project Modal */}
+      {editModal.show && (
+        <EditProjectModal
+          projectId={editModal.projectId}
+          onClose={handleEditClose}
+          onSuccess={handleEditSuccess}
+        />
+      )}
 
       <motion.div
         className="welcome-section"
@@ -413,7 +460,12 @@ const StartupDashboard = () => {
                       >
                         View Applicants
                       </button>
-                      <button className="action-btn edit">Edit</button>
+                      <button
+                        className="action-btn edit"
+                        onClick={() => handleEditClick(project)}
+                      >
+                        Edit
+                      </button>
                       <button
                         className="action-btn delete"
                         onClick={() => handleDeleteClick(project)}
