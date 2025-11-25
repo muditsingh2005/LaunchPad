@@ -109,7 +109,10 @@ const StartupDashboard = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="welcome-content">
-          <h1>Welcome back, {userProfile?.name || "Startup"}! 🚀</h1>
+          <h1>
+            Welcome back, {userProfile?.name || "Startup"}!{" "}
+            <span className="emoji">🚀</span>
+          </h1>
           <p>Manage your projects and connect with talented students</p>
         </div>
       </motion.div>

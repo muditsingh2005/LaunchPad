@@ -13,11 +13,22 @@
 .listing-header h1 {
   font-size: 2.5rem;
   font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.listing-header h1 .icon {
+  font-size: 2.5rem;
+}
+
+.listing-header h1 .gradient-text {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 0.5rem;
 }
 
 .listing-header p {
@@ -221,6 +232,10 @@
     font-size: 2rem;
   }
 
+  .listing-header h1 .icon {
+    font-size: 2rem;
+  }
+
   .listing-header p {
     font-size: 1rem;
   }
@@ -239,6 +254,10 @@
 
 @media (max-width: 480px) {
   .listing-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .listing-header h1 .icon {
     font-size: 1.5rem;
   }
 

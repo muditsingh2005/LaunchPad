@@ -119,7 +119,8 @@ const StudentDashboard = () => {
       >
         <div className="welcome-content">
           <h1>
-            Welcome back, {userProfile?.name?.split(" ")[0] || "Student"}! 🎓
+            Welcome back, {userProfile?.name?.split(" ")[0] || "Student"}!{" "}
+            <span className="emoji">🎓</span>
           </h1>
           <p>Here's what's happening with your projects today</p>
         </div>

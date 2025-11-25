@@ -26,7 +26,10 @@ const Topbar = ({ user, onMenuToggle }) => {
 
         <div className="topbar-greeting">
           <h2>
-            {getGreeting()}, {user?.name?.split(" ")[0] || "User"}! 👋
+            <span className="greeting-text">
+              {getGreeting()}, {user?.name?.split(" ")[0] || "User"}!
+            </span>{" "}
+            <span className="greeting-emoji">👋</span>
           </h2>
           <p>
             {user?.role === "student"

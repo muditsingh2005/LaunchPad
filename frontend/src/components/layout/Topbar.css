@@ -48,12 +48,21 @@
 .topbar-greeting h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #2d3748;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar-greeting h2 .greeting-text {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.topbar-greeting h2 .greeting-emoji {
+  font-size: 1.5rem;
 }
 
 .topbar-greeting p {
@@ -159,6 +168,10 @@
     font-size: 1.2rem;
   }
 
+  .topbar-greeting h2 .greeting-emoji {
+    font-size: 1.2rem;
+  }
+
   .topbar-greeting p {
     font-size: 0.8rem;
   }
@@ -185,6 +198,10 @@
   }
 
   .topbar-greeting h2 {
+    font-size: 1rem;
+  }
+
+  .topbar-greeting h2 .greeting-emoji {
     font-size: 1rem;
   }
 }

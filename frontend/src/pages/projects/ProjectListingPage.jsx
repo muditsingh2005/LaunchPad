@@ -257,7 +257,10 @@ const ProjectListingPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1>🚀 Explore Projects</h1>
+        <h1>
+          <span className="icon">🚀</span>{" "}
+          <span className="gradient-text">Explore Projects</span>
+        </h1>
         <p>
           Discover {filteredProjects.length} amazing opportunities from top
           startups
