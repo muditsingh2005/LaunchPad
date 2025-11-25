@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { startupDashboardAPI } from "../../services/dashboardService";
 import { DashboardSkeleton } from "../../components/common/SkeletonLoader";
 import "./StartupDashboard.css";
@@ -19,6 +19,12 @@ const StartupDashboard = () => {
   const [myProjects, setMyProjects] = useState([]);
   const [error, setError] = useState(null);
   const [hasFetched, setHasFetched] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    show: false,
+    project: null,
+  });
+  const [deletingId, setDeletingId] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   const fetchDashboardData = useCallback(async () => {
     if (hasFetched) return;
@@ -79,6 +85,61 @@ const StartupDashboard = () => {
     });
   };
 
+  const showToast = (message, type) => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: "", type: "" });
+    }, 3000);
+  };
+
+  const handleDeleteClick = (project) => {
+    setDeleteModal({ show: true, project });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const project = deleteModal.project;
+    if (!project) return;
+
+    try {
+      setDeletingId(project._id);
+      setDeleteModal({ show: false, project: null });
+
+      await startupDashboardAPI.deleteProject(project._id);
+
+      // Remove project from local state with fade-out effect
+      setMyProjects((prev) => prev.filter((p) => p._id !== project._id));
+
+      // Update stats
+      setLocalStats((prev) => ({
+        totalProjects: prev.totalProjects - 1,
+        activeProjects:
+          project.status === "open"
+            ? prev.activeProjects - 1
+            : prev.activeProjects,
+        totalApplicants:
+          prev.totalApplicants - (project.applicants?.length || 0),
+        hiredStudents:
+          prev.hiredStudents -
+          (project.applicants?.filter((a) => a.status === "accepted").length ||
+            0),
+      }));
+
+      showToast("Project deleted successfully", "success");
+    } catch (err) {
+      console.error("Error deleting project:", err);
+      showToast(
+        err.response?.data?.message || "Failed to delete project",
+        "error"
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ show: false, project: null });
+  };
+
   if (loading) {
     return (
       <div className="startup-dashboard">
@@ -102,6 +163,68 @@ const StartupDashboard = () => {
 
   return (
     <div className="startup-dashboard">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: -50, x: "-50%" }}
+            className={`dashboard-toast ${toast.type}`}
+          >
+            <span className="toast-icon">
+              {toast.type === "success" ? "✓" : "✕"}
+            </span>
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteModal.show && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={handleDeleteCancel}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="delete-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-icon">⚠️</div>
+              <h3>Delete Project</h3>
+              <p>
+                Are you sure you want to delete{" "}
+                <strong>"{deleteModal.project?.title}"</strong>?
+              </p>
+              <p className="modal-warning">
+                This action cannot be undone. All applicant data will be lost.
+              </p>
+              <div className="modal-actions">
+                <button
+                  className="modal-btn cancel"
+                  onClick={handleDeleteCancel}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="modal-btn confirm"
+                  onClick={handleDeleteConfirm}
+                >
+                  Delete Project
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div
         className="welcome-section"
         initial={{ opacity: 0, y: 20 }}
@@ -222,86 +345,96 @@ const StartupDashboard = () => {
           </div>
         ) : (
           <div className="projects-list">
-            {myProjects.map((project) => (
-              <motion.div
-                key={project._id}
-                className="startup-project-card"
-                whileHover={{ x: 5 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="project-main">
-                  <div className="project-info">
-                    <div className="project-title-row">
-                      <h3>{project.title}</h3>
-                      <span
-                        className={`project-status ${getProjectStatusClass(
-                          project.status
-                        )}`}
-                      >
-                        {project.status?.charAt(0).toUpperCase() +
-                          project.status?.slice(1)}
-                      </span>
-                    </div>
-                    <p className="project-desc">
-                      {project.description?.substring(0, 150)}
-                      {project.description?.length > 150 ? "..." : ""}
-                    </p>
+            <AnimatePresence>
+              {myProjects.map((project) => (
+                <motion.div
+                  key={project._id}
+                  className="startup-project-card"
+                  initial={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ x: 5 }}
+                >
+                  <div className="project-main">
+                    <div className="project-info">
+                      <div className="project-title-row">
+                        <h3>{project.title}</h3>
+                        <span
+                          className={`project-status ${getProjectStatusClass(
+                            project.status
+                          )}`}
+                        >
+                          {project.status?.charAt(0).toUpperCase() +
+                            project.status?.slice(1)}
+                        </span>
+                      </div>
+                      <p className="project-desc">
+                        {project.description?.substring(0, 150)}
+                        {project.description?.length > 150 ? "..." : ""}
+                      </p>
 
-                    <div className="project-meta-row">
-                      <span className="meta-badge stipend">
-                        💰 ₹{project.stipend?.toLocaleString() || 0}
-                      </span>
-                      <span className="meta-badge duration">
-                        ⏱️ {project.duration || "Flexible"}
-                      </span>
-                      <span className="meta-badge applicants">
-                        👥 {project.applicants?.length || 0} Applicants
-                      </span>
-                    </div>
+                      <div className="project-meta-row">
+                        <span className="meta-badge stipend">
+                          💰 ₹{project.stipend?.toLocaleString() || 0}
+                        </span>
+                        <span className="meta-badge duration">
+                          ⏱️ {project.duration || "Flexible"}
+                        </span>
+                        <span className="meta-badge applicants">
+                          👥 {project.applicants?.length || 0} Applicants
+                        </span>
+                      </div>
 
-                    {project.requiredSkills &&
-                      project.requiredSkills.length > 0 && (
-                        <div className="project-skills-row">
-                          {project.requiredSkills
-                            .slice(0, 4)
-                            .map((skill, index) => (
-                              <span key={index} className="skill-chip">
-                                {skill}
+                      {project.requiredSkills &&
+                        project.requiredSkills.length > 0 && (
+                          <div className="project-skills-row">
+                            {project.requiredSkills
+                              .slice(0, 4)
+                              .map((skill, index) => (
+                                <span key={index} className="skill-chip">
+                                  {skill}
+                                </span>
+                              ))}
+                            {project.requiredSkills.length > 4 && (
+                              <span className="skill-chip">
+                                +{project.requiredSkills.length - 4}
                               </span>
-                            ))}
-                          {project.requiredSkills.length > 4 && (
-                            <span className="skill-chip">
-                              +{project.requiredSkills.length - 4}
-                            </span>
-                          )}
-                        </div>
-                      )}
+                            )}
+                          </div>
+                        )}
+                    </div>
+
+                    <div className="project-actions">
+                      <button
+                        className="action-btn view"
+                        onClick={() =>
+                          navigate(`/projects/${project._id}/applicants`)
+                        }
+                      >
+                        View Applicants
+                      </button>
+                      <button className="action-btn edit">Edit</button>
+                      <button
+                        className="action-btn delete"
+                        onClick={() => handleDeleteClick(project)}
+                        disabled={deletingId === project._id}
+                      >
+                        {deletingId === project._id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="project-actions">
-                    <button
-                      className="action-btn view"
-                      onClick={() =>
-                        navigate(`/projects/${project._id}/applicants`)
-                      }
-                    >
-                      View Applicants
-                    </button>
-                    <button className="action-btn edit">Edit</button>
-                    <button className="action-btn delete">Delete</button>
+                  <div className="project-footer-info">
+                    <span className="footer-text">
+                      Created: {formatDate(project.createdAt)}
+                    </span>
+                    <span className="footer-text">
+                      Deadline: {formatDate(project.deadline)}
+                    </span>
                   </div>
-                </div>
-
-                <div className="project-footer-info">
-                  <span className="footer-text">
-                    Created: {formatDate(project.createdAt)}
-                  </span>
-                  <span className="footer-text">
-                    Deadline: {formatDate(project.deadline)}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </motion.div>
