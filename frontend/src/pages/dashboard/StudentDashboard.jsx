@@ -169,12 +169,6 @@ const StudentDashboard = () => {
         <div className="profile-content">
           <div className="profile-details">
             <div className="detail-row">
-              <span className="detail-label">Roll No:</span>
-              <span className="detail-value">
-                {userProfile?.rollNo || "N/A"}
-              </span>
-            </div>
-            <div className="detail-row">
               <span className="detail-label">Department:</span>
               <span className="detail-value">
                 {userProfile?.department || "N/A"}
