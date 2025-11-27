@@ -6,7 +6,7 @@ import { DashboardSkeleton } from "../../components/common/SkeletonLoader";
 import "./StudentDashboard.css";
 
 const StudentDashboard = () => {
-  const { userProfile } = useOutletContext();
+  const { userProfile, refreshProfile } = useOutletContext();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);

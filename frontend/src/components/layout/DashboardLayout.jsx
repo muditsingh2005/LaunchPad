@@ -78,6 +78,7 @@ const DashboardLayout = () => {
         onLogout={handleLogout}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        onProfileUpdate={fetchUserProfile}
       />
 
       <div className="dashboard-main">

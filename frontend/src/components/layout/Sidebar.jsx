@@ -1,10 +1,20 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion as Motion, AnimatePresence } from "framer-motion";
+import { studentDashboardAPI } from "../../services/dashboardService";
 import "./Sidebar.css";
 
-const Sidebar = ({ user, loading, onLogout, isOpen, onClose }) => {
+const Sidebar = ({
+  user,
+  loading,
+  onLogout,
+  isOpen,
+  onClose,
+  onProfileUpdate,
+}) => {
   const location = useLocation();
+  const [uploadingPicture, setUploadingPicture] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Navigation items based on role
   const getNavItems = () => {
@@ -39,6 +49,60 @@ const Sidebar = ({ user, loading, onLogout, isOpen, onClose }) => {
   };
 
   const navItems = getNavItems();
+
+  const handleEditPictureClick = () => {
+    if (user?.role !== "student") return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Please select a valid image file (JPEG, PNG, GIF, or WebP)");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB");
+      return;
+    }
+
+    try {
+      setUploadingPicture(true);
+
+      const formData = new FormData();
+      formData.append("profilePicture", file);
+
+      const response = await studentDashboardAPI.uploadProfilePicture(formData);
+
+      if (response.data?.profilePictureUrl) {
+        // Trigger profile refresh in parent
+        if (onProfileUpdate) {
+          await onProfileUpdate();
+        }
+        alert("Profile picture updated successfully!");
+      }
+    } catch (err) {
+      console.error("Error uploading profile picture:", err);
+      alert(err.response?.data?.message || "Failed to upload profile picture");
+    } finally {
+      setUploadingPicture(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   return (
     <>
@@ -78,13 +142,34 @@ const Sidebar = ({ user, loading, onLogout, isOpen, onClose }) => {
             </div>
           ) : (
             <>
-              <div className="profile-avatar">
-                {user?.profileImage ? (
-                  <img src={user.profileImage} alt={user?.name} />
-                ) : (
-                  <div className="avatar-placeholder">
-                    {user?.name?.charAt(0).toUpperCase() || "?"}
-                  </div>
+              <div className="profile-avatar-wrapper">
+                <div className="profile-avatar">
+                  {user?.profilePicture ? (
+                    <img src={user.profilePicture} alt={user?.name} />
+                  ) : (
+                    <div className="avatar-placeholder">
+                      {user?.name?.charAt(0).toUpperCase() || "?"}
+                    </div>
+                  )}
+                </div>
+                {user?.role === "student" && (
+                  <>
+                    <button
+                      className="edit-avatar-btn"
+                      onClick={handleEditPictureClick}
+                      disabled={uploadingPicture}
+                      title="Change profile picture"
+                    >
+                      {uploadingPicture ? "⏳" : "✏️"}
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      style={{ display: "none" }}
+                    />
+                  </>
                 )}
               </div>
               <div className="profile-info">
