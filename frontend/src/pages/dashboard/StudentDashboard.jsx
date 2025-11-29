@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { studentDashboardAPI } from "../../services/dashboardService";
 import { DashboardSkeleton } from "../../components/common/SkeletonLoader";
+import EditProfileModal from "../../components/student/EditProfileModal";
 import "./StudentDashboard.css";
 
 const StudentDashboard = () => {
@@ -18,6 +19,8 @@ const StudentDashboard = () => {
   const [myApplications, setMyApplications] = useState([]);
   const [error, setError] = useState(null);
   const [hasFetched, setHasFetched] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   const fetchDashboardData = useCallback(async () => {
     if (hasFetched) return;
@@ -86,6 +89,26 @@ const StudentDashboard = () => {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const showToast = (message, type) => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: "", type: "" });
+    }, 3000);
+  };
+
+  const handleEditProfile = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleProfileUpdateSuccess = async (updatedProfile) => {
+    // Refresh the profile to update across dashboard
+    if (refreshProfile) {
+      await refreshProfile();
+    }
+    showToast("Profile updated successfully", "success");
+    setIsEditModalOpen(false);
   };
 
   if (loading) {
@@ -165,6 +188,10 @@ const StudentDashboard = () => {
       >
         <div className="card-header">
           <h2>Your Profile</h2>
+          <button className="edit-profile-btn" onClick={handleEditProfile}>
+            <span className="edit-icon">✏️</span>
+            Edit Profile
+          </button>
         </div>
         <div className="profile-content">
           <div className="profile-details">
@@ -262,6 +289,31 @@ const StudentDashboard = () => {
           </div>
         )}
       </motion.div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: -50, x: "-50%" }}
+            className={`dashboard-toast ${toast.type}`}
+          >
+            <span className="toast-icon">
+              {toast.type === "success" ? "✓" : "✕"}
+            </span>
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        userProfile={userProfile}
+        onSuccess={handleProfileUpdateSuccess}
+      />
     </div>
   );
 };

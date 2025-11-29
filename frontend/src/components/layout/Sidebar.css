@@ -56,8 +56,8 @@
 
 .profile-avatar-wrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 130px;
+  height: 130px;
   margin: 0 auto 1rem;
 }
 
@@ -159,8 +159,8 @@
 }
 
 .skeleton-avatar {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
