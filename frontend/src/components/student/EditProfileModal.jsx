@@ -195,7 +195,7 @@ const EditProfileModal = ({ isOpen, onClose, userProfile, onSuccess }) => {
                 </div>
               </div>
 
-              {/* Skills */
+              {/* Skills */}
               <div className="form-group">
                 <label>Skills</label>
                 <div className="tag-input-container">
