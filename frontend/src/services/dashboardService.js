@@ -114,6 +114,14 @@ export const startupDashboardAPI = {
     );
     return response.data;
   },
+
+  // Upload logo
+  uploadLogo: async (formData) => {
+    const response = await api.post("/api/v3/startup/profile/logo", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  },
 };
 
 // Common project APIs

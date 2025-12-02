@@ -259,6 +259,65 @@ const getStartupProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const uploadStartupLogo = asyncHandler(async (req, res) => {
+  const startupId = req.user?._id;
+
+  if (!startupId) {
+    throw new ApiError(401, "Unauthorized - Startup ID not found");
+  }
+
+  if (!req.file) {
+    throw new ApiError(400, "Logo file is required");
+  }
+  const allowedImageMimes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
+  if (!allowedImageMimes.includes(req.file.mimetype)) {
+    throw new ApiError(
+      400,
+      "Invalid file type. Only image files (JPEG, PNG, GIF, WebP) are allowed."
+    );
+  }
+
+  const uploadResponse = await uploadOnCloudinary(
+    req.file.path,
+    req.file.mimetype
+  );
+
+  if (!uploadResponse) {
+    throw new ApiError(400, "Failed to upload logo to Cloudinary");
+  }
+
+  const logoUrl = uploadResponse.secure_url || uploadResponse.url;
+
+  if (!logoUrl) {
+    throw new ApiError(400, "No URL returned from Cloudinary upload");
+  }
+  const updatedStartup = await StartupModel.findByIdAndUpdate(
+    startupId,
+    { $set: { logoUrl } },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken");
+
+  if (!updatedStartup) {
+    throw new ApiError(404, "Startup not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { logoUrl: updatedStartup.logoUrl },
+        "Logo uploaded successfully"
+      )
+    );
+});
+
 const updateStartupProfile = asyncHandler(async (req, res) => {
   const startupId = req.user?._id;
 
@@ -382,4 +441,5 @@ export {
   updateStartupProfile,
   deleteStartupAccount,
   uploadResume,
+  uploadStartupLogo,
 };

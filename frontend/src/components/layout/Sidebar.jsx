@@ -1,7 +1,10 @@
 import React, { useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import { studentDashboardAPI } from "../../services/dashboardService";
+import {
+  studentDashboardAPI,
+  startupDashboardAPI,
+} from "../../services/dashboardService";
 import "./Sidebar.css";
 
 const Sidebar = ({
@@ -51,7 +54,7 @@ const Sidebar = ({
   const navItems = getNavItems();
 
   const handleEditPictureClick = () => {
-    if (user?.role !== "student") return;
+    if (user?.role !== "student" && user?.role !== "startup") return;
     fileInputRef.current?.click();
   };
 
@@ -82,20 +85,35 @@ const Sidebar = ({
       setUploadingPicture(true);
 
       const formData = new FormData();
-      formData.append("profilePicture", file);
+      let response;
 
-      const response = await studentDashboardAPI.uploadProfilePicture(formData);
+      if (user?.role === "student") {
+        formData.append("profilePicture", file);
+        response = await studentDashboardAPI.uploadProfilePicture(formData);
 
-      if (response.data?.profilePictureUrl) {
-        // Trigger profile refresh in parent
-        if (onProfileUpdate) {
-          await onProfileUpdate();
+        if (response.data?.profilePictureUrl) {
+          // Trigger profile refresh in parent
+          if (onProfileUpdate) {
+            await onProfileUpdate();
+          }
+          alert("Profile picture updated successfully!");
         }
-        alert("Profile picture updated successfully!");
+      } else if (user?.role === "startup") {
+        formData.append("logo", file);
+        response = await startupDashboardAPI.uploadLogo(formData);
+
+        if (response.data?.logoUrl) {
+          // Trigger profile refresh in parent
+          if (onProfileUpdate) {
+            await onProfileUpdate();
+          }
+          alert("Logo updated successfully!");
+        }
       }
     } catch (err) {
-      console.error("Error uploading profile picture:", err);
-      alert(err.response?.data?.message || "Failed to upload profile picture");
+      console.error("Error uploading image:", err);
+      const imageType = user?.role === "startup" ? "logo" : "profile picture";
+      alert(err.response?.data?.message || `Failed to upload ${imageType}`);
     } finally {
       setUploadingPicture(false);
       if (fileInputRef.current) {
@@ -144,21 +162,28 @@ const Sidebar = ({
             <>
               <div className="profile-avatar-wrapper">
                 <div className="profile-avatar">
-                  {user?.profilePicture ? (
-                    <img src={user.profilePicture} alt={user?.name} />
+                  {user?.profilePicture || user?.logoUrl ? (
+                    <img
+                      src={user?.profilePicture || user?.logoUrl}
+                      alt={user?.name}
+                    />
                   ) : (
                     <div className="avatar-placeholder">
                       {user?.name?.charAt(0).toUpperCase() || "?"}
                     </div>
                   )}
                 </div>
-                {user?.role === "student" && (
+                {(user?.role === "student" || user?.role === "startup") && (
                   <>
                     <button
                       className="edit-avatar-btn"
                       onClick={handleEditPictureClick}
                       disabled={uploadingPicture}
-                      title="Change profile picture"
+                      title={
+                        user?.role === "startup"
+                          ? "Change logo"
+                          : "Change profile picture"
+                      }
                     >
                       {uploadingPicture ? "⏳" : "✏️"}
                     </button>
