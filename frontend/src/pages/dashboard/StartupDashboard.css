@@ -130,19 +130,19 @@
 }
 
 .company-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
 }
 
 .detail-row {
   display: flex;
   align-items: start;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .detail-row.full-width {
-  grid-column: 1 / -1;
   flex-direction: column;
   gap: 0.5rem;
 }
@@ -150,13 +150,15 @@
 .detail-label {
   font-weight: 600;
   color: #4a5568;
-  min-width: 100px;
+  min-width: 80px;
   flex-shrink: 0;
 }
 
 .detail-value {
   color: #2d3748;
   line-height: 1.6;
+  flex: 1;
+  word-break: break-word;
 }
 
 .detail-link {
