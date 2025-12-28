@@ -23,6 +23,9 @@ import ProjectDetailsPage from "./pages/projects/ProjectDetailsPage";
 import ProjectApplicantsPage from "./pages/projects/ProjectApplicantsPage";
 import CreateProject from "./pages/projects/CreateProject";
 
+// Student
+import PublicProfile from "./pages/student/PublicProfile";
+
 // Dashboard Layout
 import DashboardLayout from "./components/layout/DashboardLayout";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
@@ -105,6 +108,16 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CreateProject />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Student Public Profile Page */}
+            <Route
+              path="/student/profile/:id"
+              element={
+                <ProtectedRoute>
+                  <PublicProfile />
                 </ProtectedRoute>
               }
             />

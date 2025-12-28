@@ -7,8 +7,9 @@ import ProjectModel from "../models/Project.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 //controllers for student role
+// Private profile - for students viewing their own profile
 const getStudentProfile = asyncHandler(async (req, res) => {
-  const studentId = req.user?._id || req.params?.id;
+  const studentId = req.user?._id;
 
   if (!studentId) {
     throw new ApiError(400, "Student ID is required");
@@ -26,6 +27,33 @@ const getStudentProfile = asyncHandler(async (req, res) => {
     .status(200)
     .json(
       new ApiResponse(200, student, "Student profile fetched successfully")
+    );
+});
+
+// Public profile - for any authenticated user viewing a student's profile
+const getPublicStudentProfile = asyncHandler(async (req, res) => {
+  const studentId = req.params?.id;
+
+  if (!studentId) {
+    throw new ApiError(400, "Student ID is required");
+  }
+
+  const student = await StudentModel.findById(studentId).select(
+    "-password -refreshToken"
+  );
+
+  if (!student) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        student,
+        "Public student profile fetched successfully"
+      )
     );
 });
 
@@ -434,6 +462,7 @@ const deleteStartupAccount = asyncHandler(async (req, res) => {
 
 export {
   getStudentProfile,
+  getPublicStudentProfile,
   updateStudentProfile,
   uploadStudentProfilePicture,
   deleteStudentAccount,

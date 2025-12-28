@@ -166,11 +166,27 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
+.student-name-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.student-name-link:hover h3 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transform: translateX(4px);
+}
+
 .name-section h3 {
   font-size: 1.25rem;
   color: #1f2937;
   font-weight: 700;
   margin-bottom: 0.25rem;
+  transition: transform 0.3s ease;
 }
 
 .email {

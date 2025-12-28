@@ -32,7 +32,7 @@ const Sidebar = ({
         //   label: "My Applications",
         //   icon: "📝",
         // },
-        { path: "/dashboard/profile", label: "Profile", icon: "👤" },
+        { path: `/student/profile/${user?._id}`, label: "Profile", icon: "👤" },
       ];
     } else if (user?.role === "startup") {
       return [

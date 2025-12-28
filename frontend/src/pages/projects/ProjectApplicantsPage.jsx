@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "../../services/axiosInstance";
 import "./ProjectApplicantsPage.css";
@@ -202,10 +202,15 @@ const ProjectApplicantsPage = () => {
                         {student.lastName?.[0] || ""}
                       </div>
                       <div className="name-section">
-                        <h3>
-                          {student.firstName || "Student"}{" "}
-                          {student.lastName || ""}
-                        </h3>
+                        <Link
+                          to={`/student/profile/${studentId}`}
+                          className="student-name-link"
+                        >
+                          <h3>
+                            {student.firstName || "Student"}{" "}
+                            {student.lastName || ""}
+                          </h3>
+                        </Link>
                         <p className="email">{student.email || "N/A"}</p>
                       </div>
                     </div>

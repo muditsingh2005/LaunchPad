@@ -1,5 +1,6 @@
 import {
   getStudentProfile,
+  getPublicStudentProfile,
   updateStudentProfile,
   uploadStudentProfilePicture,
   deleteStudentAccount,
@@ -11,10 +12,12 @@ import { Router } from "express";
 
 const router = Router();
 
+// Private routes - student only
 router.route("/profile").get(verifyJWT, isStudent, getStudentProfile);
-router.route("/profile/:id").get(verifyJWT, isStudent, getStudentProfile); //didnt tested
-
 router.route("/profile/update").put(verifyJWT, isStudent, updateStudentProfile);
+
+// Public profile - accessible by all authenticated users (students & startups)
+router.route("/public-profile/:id").get(verifyJWT, getPublicStudentProfile);
 
 router
   .route("/profile/picture/upload")
